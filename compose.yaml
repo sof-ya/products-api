@@ -48,9 +48,24 @@ services:
                 - '-p${DB_PASSWORD}'
             retries: 3
             timeout: 5s
+    elasticsearch:
+        image: elasticsearch:8.17.0
+        ports:
+            - "9200:9200"
+            - "9300:9300"
+        environment:
+            - discovery.type=single-node
+            - xpack.security.enabled=false
+            - ES_JAVA_OPTS=-Xms512m -Xmx512m
+        volumes:
+            - elasticsearch:/usr/share/elasticsearch/data
+        networks:
+            - sail
 networks:
     sail:
         driver: bridge
 volumes:
     sail-mysql:
+        driver: local
+    elasticsearch:
         driver: local
