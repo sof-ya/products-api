@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\OpenApi\Responces;
+namespace App\Http\OpenApi\Responses;
 
 use OpenApi\Attributes as OA;
 
