@@ -23,7 +23,12 @@ abstract class Controller extends BaseController
         $rules = [
             ...$this->paginationRules(),
             'sort' => ['nullable', Rule::in(['price_asc', 'price_desc', 'rating_desc', 'newest'])],
-            'q' => 'nullable|string|max:255'
+            'q' => 'nullable|string|max:255',
+            'price_from' => ['nullable', 'numeric', 'min:1'],
+            'price_to' => ['nullable', 'numeric', 'min:1'],
+            'category_id' => ['nullable', 'exists:categories,id'],
+            'in_stock' => ['nullable', 'boolean'],
+            'rating_from' => ['nullable', 'numeric', 'min:1', 'max:5']
         ];
 
         $validated = $request->validate($rules);
@@ -59,7 +64,22 @@ abstract class Controller extends BaseController
             'per_page' => $validated['per_page'] ?? 10,
             'sortBy' => $sortBy,
             'sortDir' => $sortDir,
-            'search' => $validated['q'] ?? null
+            'search' => $validated['q'] ?? null,
+            'filters' => [
+                'price' => [
+                    '>' => $validated['price_from'] ?? null,
+                    '<' => $validated['price_to'] ?? null,
+                ],
+                'category_id' => [
+                    '=' => $validated['category_id'] ?? null
+                ],
+                'in_stock' => [
+                    '=' => $validated['in_stock'] ?? null
+                ],
+                'rating' => [
+                    '>' => $validated['rating_from'] ?? null
+                ]
+            ]
         ];
     }
 
@@ -67,7 +87,14 @@ abstract class Controller extends BaseController
         $query = app($repositoryClass)->query();
         if($params['search']) {
             $query = app($repositoryClass)->search($params['search']);
-        }        
+        }
+        foreach ($params['filters'] as $columnName => $filters) {
+            foreach ($filters as $operation => $value) {
+                if($value != null) {
+                    $query->where($columnName, $operation, $value);
+                }
+            }
+        }
         $query->orderBy($params['sortBy'], $params['sortDir']);
 
         return $query;
