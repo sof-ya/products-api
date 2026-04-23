@@ -59,12 +59,17 @@ abstract class Controller extends BaseController
             'per_page' => $validated['per_page'] ?? 10,
             'sortBy' => $sortBy,
             'sortDir' => $sortDir,
-            'search' => $validated['search'] ?? null
+            'search' => $validated['q'] ?? null
         ];
     }
 
-    protected function useListParams(Builder $query, array $params) : Builder {
+    protected function useListParams(string $repositoryClass, array $params) : Builder {
+        $query = app($repositoryClass)->query();
+        if($params['search']) {
+            $query = app($repositoryClass)->search($params['search']);
+        }        
         $query->orderBy($params['sortBy'], $params['sortDir']);
+
         return $query;
     }
 }

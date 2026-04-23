@@ -11,8 +11,8 @@ class ProductController extends Controller
     public function index(Request $request)
     {
         $params = $this->listParams($request);
-        $query = Product::query();
-        $this->useListParams($query, $params);
+
+        $query = $this->useListParams(\App\Repositories\ProductRepository::class, $params);
 
         $paginator = $query->paginate($params['per_page'], ['*'], 'page', $params['page']);
 
